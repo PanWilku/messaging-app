@@ -1,9 +1,13 @@
-import Image from "next/image";
+"use client";
+import { signIn, signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
-  return (
-    <div className="flex w-full bg-amber-400">
-      <main className=""></main>
-    </div>
-  );
+  const router = useRouter();
+  useEffect(() => {
+    router.push("/signin");
+  }, [router]);
+
+  return <></>;
 }
