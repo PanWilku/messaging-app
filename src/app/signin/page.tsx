@@ -59,7 +59,7 @@ export default function SignInPage() {
             <button
               type="button"
               onClick={() => setMode("credentials")}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                 mode === "credentials"
                   ? "bg-white text-gray-900 shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
@@ -70,7 +70,7 @@ export default function SignInPage() {
             <button
               type="button"
               onClick={() => setMode("guest")}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                 mode === "guest"
                   ? "bg-white text-gray-900 shadow-sm"
                   : "text-gray-600 hover:text-gray-900"
@@ -142,7 +142,7 @@ export default function SignInPage() {
                 submitting ||
                 (mode === "credentials" ? !email || !password : !name.trim())
               }
-              className={`w-full rounded-lg px-4 py-2.5 font-medium text-white disabled:opacity-60 transition-colors ${
+              className={`w-full rounded-lg px-4 py-2.5 font-medium text-white disabled:opacity-60 transition-colors cursor-pointer ${
                 mode === "credentials"
                   ? "bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600"
                   : "bg-green-600 hover:bg-green-700 disabled:bg-green-600"
@@ -157,7 +157,7 @@ export default function SignInPage() {
           </form>
           <div>
             <p>
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <a href="/signup" className="text-blue-500 hover:underline">
                 Sign up
               </a>
