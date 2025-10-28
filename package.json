@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@lineiconshq/free-icons": "^1.0.3",
+    "@lineiconshq/react-lineicons": "^1.0.5",
     "@prisma/client": "^6.18.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",

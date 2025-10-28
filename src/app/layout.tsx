@@ -26,9 +26,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} container flex w-full justify-center bg-emerald-300`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen w-full bg-emerald-300`}
       >
-        <Providers>{children}</Providers>
+        <div className="container mx-auto min-h-screen flex justify-center">
+          <Providers>{children}</Providers>
+        </div>
       </body>
     </html>
   );
