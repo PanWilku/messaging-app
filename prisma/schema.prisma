@@ -19,13 +19,19 @@ model User {
   email        String   @unique
   name         String?
   passwordHash String
+  avatar       String?
+  description  String?
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
   friends      User[]   @relation("UserFriends")
   friendOf     User[]   @relation("UserFriends")
 }
 
 model Guest {
-  id        Int      @id @default(autoincrement())
-  name      String?
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  name        String?
+  avatar      String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 }

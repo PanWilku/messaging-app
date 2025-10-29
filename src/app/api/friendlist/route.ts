@@ -1,25 +1,33 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Get token for authentication
-    const token = await getToken({
-      req: request,
-      secret: process.env.NEXTAUTH_SECRET,
-    });
+    // Get session for authentication
+    const session = await getServerSession(authOptions);
 
-    if (!token) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
       );
     }
 
-    const userId = token.id as string;
+    const userId = session.user.id;
+    const userType = session.user.type;
 
-    // Get user's friends from database
+    // Only registered users can have friends
+    if (userType !== "user") {
+      return NextResponse.json({
+        friends: [],
+        userId: userId,
+        userName: session.user.name,
+        message: "Guest users cannot have friends",
+      });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: parseInt(userId) },
       include: {

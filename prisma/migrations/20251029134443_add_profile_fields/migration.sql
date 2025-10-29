@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "Guest" ADD COLUMN     "avatar" TEXT,
+ADD COLUMN     "description" TEXT,
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "avatar" TEXT,
+ADD COLUMN     "description" TEXT,
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

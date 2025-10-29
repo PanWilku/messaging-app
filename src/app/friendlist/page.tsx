@@ -11,6 +11,7 @@ export default function FriendListPage() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchFriends() {
@@ -26,6 +27,9 @@ export default function FriendListPage() {
         }
 
         const data = await res.json();
+        if (data.message) {
+          setMessage(data.message);
+        }
         setFriends(data.friends);
       } catch (err) {
         setError(
@@ -73,7 +77,11 @@ export default function FriendListPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Friends</h1>
       {friends.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-600">No friends yet. Start adding some!</p>
+          {message ? (
+            <p className="text-gray-600 mb-4">{message}</p>
+          ) : (
+            <p className="text-gray-600">No friends yet. Start adding some!</p>
+          )}
         </div>
       ) : (
         <div className="grid gap-4">
