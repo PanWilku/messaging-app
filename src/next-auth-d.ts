@@ -18,15 +18,6 @@ declare module "next-auth" {
   }
 }
 
-type Creds = {
-  email?: string;
-  password?: string;
-};
-
-type GuestCreds = {
-  name?: string;
-};
-
 declare module "next-auth/jwt" {
   interface JWT {
     id?: string;

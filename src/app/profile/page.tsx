@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 type ProfileData = {
   id: number;
@@ -242,10 +243,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-green-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="flex w-full min-h-screen bg-gradient-to-br from-amber-50 to-green-50 py-8 px-4">
+      <div className="flex w-full flex-col max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex w-full items-center justify-between">
           <Link
             href="/dashboard"
             className="text-gray-600 hover:text-gray-900 flex items-center gap-2 transition-colors"
@@ -287,17 +288,18 @@ export default function ProfilePage() {
         )}
 
         {/* Profile Card */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div className="flex w-full  flex-col bg-white rounded-2xl shadow-lg overflow-hidden">
           {/* Profile Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-green-500 h-32"></div>
+          <div className="flex w-full bg-gradient-to-r from-blue-500 to-green-500 h-32"></div>
 
-          <div className="px-6 pb-6">
-            {/* Avatar */}
+          <div className="flex w-full flex-col px-6 pb-6">
             <div className="relative -mt-16 mb-4">
               {profile.avatar ? (
-                <img
+                <Image
                   src={profile.avatar}
                   alt={profile.name || "User"}
+                  width={128}
+                  height={128}
                   className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
                 />
               ) : (
@@ -527,9 +529,11 @@ export default function ProfilePage() {
                     />
                     {formData.avatar && (
                       <div className="flex items-center gap-3">
-                        <img
+                        <Image
                           src={formData.avatar}
                           alt="Preview"
+                          width={64}
+                          height={64}
                           className="w-16 h-16 rounded-full object-cover"
                           onError={(e) => {
                             e.currentTarget.src = "";
@@ -671,89 +675,6 @@ export default function ProfilePage() {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mt-6 bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Dashboard</p>
-                <p className="text-sm text-gray-500">Go to main page</p>
-              </div>
-            </Link>
-
-            <Link
-              href="/friendlist"
-              className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div className="bg-green-100 text-green-600 p-2 rounded-lg">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-gray-900">Friends</p>
-                <p className="text-sm text-gray-500">Manage your friends</p>
-              </div>
-            </Link>
-
-            <button
-              onClick={() => signOut({ callbackUrl: "/signin" })}
-              className="flex items-center gap-3 p-4 border border-red-200 rounded-lg hover:bg-red-50 transition-colors cursor-pointer text-left"
-            >
-              <div className="bg-red-100 text-red-600 p-2 rounded-lg">
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-red-900">Sign Out</p>
-                <p className="text-sm text-red-600">Log out of your account</p>
-              </div>
-            </button>
           </div>
         </div>
       </div>
