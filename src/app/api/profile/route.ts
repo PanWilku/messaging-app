@@ -19,16 +19,6 @@ type GuestUpdateData = {
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    console.log("Session in profile GET:", session);
-    console.log("Session in profile GET:", session);
-    console.log("Session in profile GET:", session);
-    console.log("Session in profile GET:", session);
-    console.log("Session in profile GET:", session);
-    console.log("Session in profile GET:", session);
-    console.log("Session in profile GET:", session);
-    console.log("Session in profile GET:", session);
-    console.log("Session in profile GET:", session);
-    console.log("Session in profile GET:", session);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

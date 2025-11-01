@@ -2,7 +2,8 @@
 
 import { useRouter, usePathname } from "next/navigation"; // Fix import
 import { useState, useEffect } from "react";
-import { ReccomendationsData } from "@/lib/types";
+import { ReccomendationsData, SearchResult } from "@/lib/types";
+import Image from "next/image";
 
 export default function SearchPage() {
   const router = useRouter(); // Use useRouter from next/navigation
@@ -13,17 +14,30 @@ export default function SearchPage() {
     useState(true);
   const [reccomendationsData, setReccomendationsData] = useState<
     ReccomendationsData[]
-  >([]); // Now correct!
+  >([]);
+
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   function handleSearchUser() {
     if (searchQuery.trim() === "") return;
 
-    router.push(
-      "/searchresults?query=" +
-        encodeURIComponent(searchQuery.trim()) +
-        "&from=" +
-        encodeURIComponent(pathname)
-    );
+    setIsSearchLoading(true);
+
+    fetch("/api/search?query=" + encodeURIComponent(searchQuery.trim()))
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setSearchResults(data);
+        setIsSearchLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching search results:", error);
+      });
   }
 
   useEffect(() => {
@@ -61,6 +75,27 @@ export default function SearchPage() {
       >
         Search
       </button>
+      {/* Friends Search Results Section */}
+      <div>
+        {isSearchLoading ? (
+          <p>Loading search results...</p>
+        ) : (
+          <ul>
+            {searchResults.map((user) => (
+              <li key={user.id}>
+                <Image
+                  src={user.avatar || "/next.svg"}
+                  alt={user.name || "User Avatar"}
+                  width={30}
+                  height={30}
+                  className="inline-block rounded-full"
+                />
+                <span className="ml-2">{user.name}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className="flex w-full bg-amber-300">
         <p>People you might know:</p>

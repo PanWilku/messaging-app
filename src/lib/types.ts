@@ -9,3 +9,9 @@ export type ReccomendationsData = {
     name: string | null;
   }[];
 };
+
+export type SearchResult = {
+  id: number;
+  name: string | null;
+  avatar: string | null;
+};
