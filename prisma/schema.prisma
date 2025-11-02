@@ -16,22 +16,19 @@ datasource db {
 
 model User {
   id           Int      @id @default(autoincrement())
-  email        String   @unique
+  email        String?  @unique
   name         String
-  passwordHash String
+  passwordHash String?
   avatar       String?
   description  String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
   friends      User[]   @relation("UserFriends")
   friendOf     User[]   @relation("UserFriends")
+  type         UserType @default(user)
 }
 
-model Guest {
-  id          Int      @id @default(autoincrement())
-  name        String?
-  avatar      String?
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+enum UserType {
+  user
+  guest
 }

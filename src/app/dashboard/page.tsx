@@ -129,7 +129,7 @@ export default function Dashboard() {
               <p className="text-gray-600 mb-4">Manage your profile settings</p>
               <Link
                 href={{
-                  pathname: "/profile",
+                  pathname: `/profile/${session?.user.id}`,
                   query: { from: pathname },
                 }}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg font-medium transition-colors cursor-pointer text-center block"

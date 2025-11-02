@@ -26,19 +26,23 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findFirst({
-          where: { email: creds.email },
+          where: {
+            email: creds.email,
+            type: "user", // Only find regular users
+          },
         });
 
-        if (!user) return null;
+        if (!user || !user.passwordHash) return null;
 
         const isValid = await bcrypt.compare(creds.password, user.passwordHash);
         if (!isValid) return null;
 
+        // Convert null to undefined for NextAuth compatibility
         return {
           id: user.id.toString(),
-          email: user.email,
+          email: user.email ?? undefined, // Convert null to undefined
           name: user.name,
-          type: "user" as const,
+          type: user.type,
         };
       },
     }),
@@ -49,17 +53,26 @@ export const authOptions: NextAuthOptions = {
         name: { label: "Name", type: "text" },
       },
       async authorize(creds: { name?: string } | undefined) {
-        if (!creds?.name) {
+        if (!creds?.name || !creds.name.trim()) {
           return null;
         }
 
-        let guest = await prisma.guest.findFirst({
-          where: { name: creds.name },
+        // Check if guest with this name already exists
+        let guest = await prisma.user.findFirst({
+          where: {
+            name: creds.name.trim(),
+            type: "guest",
+          },
         });
 
+        // If guest doesn't exist, create new guest
         if (!guest) {
-          guest = await prisma.guest.create({
-            data: { name: creds.name },
+          guest = await prisma.user.create({
+            data: {
+              name: creds.name.trim(),
+              type: "guest",
+              // email and passwordHash are optional, so we omit them
+            },
           });
         }
 
@@ -92,5 +105,8 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
+  },
+  pages: {
+    signIn: "/signin",
   },
 };

@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 
 type ProfileData = {
   id: number;
@@ -13,6 +14,7 @@ type ProfileData = {
   description: string | null;
   createdAt: string;
   updatedAt?: string;
+  type: "user" | "guest"; // Add type to profile data
 };
 
 type EditSection =
@@ -24,8 +26,9 @@ type EditSection =
   | null;
 
 export default function ProfilePage() {
-  const { data: session, status, update } = useSession();
-  const user = session?.user;
+  const { data: session, status } = useSession();
+  const params = useParams();
+  const profileId = params?.id as string;
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +38,9 @@ export default function ProfilePage() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  // Check if this is the current user's profile
+  const isOwnProfile = session?.user?.id === profileId;
 
   // Form states
   const [formData, setFormData] = useState({
@@ -48,13 +54,15 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (profileId) {
+      fetchProfile();
+    }
+  }, [profileId]);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/profile");
+      const res = await fetch(`/api/profile/${profileId}`);
       if (res.ok) {
         const data = await res.json();
         setProfile(data.profile);
@@ -76,6 +84,7 @@ export default function ProfilePage() {
   };
 
   const handleEdit = (section: EditSection) => {
+    if (!isOwnProfile) return; // Only allow editing own profile
     setEditingSection(section);
     setMessage(null);
   };
@@ -126,11 +135,6 @@ export default function ProfilePage() {
         setProfile(data.profile);
         setEditingSection(null);
         setMessage({ type: "success", text: "Profile updated successfully!" });
-
-        // Update session if name or email changed
-        if (editingSection === "name" || editingSection === "email") {
-          await update();
-        }
       } else {
         setMessage({
           type: "error",
@@ -226,7 +230,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!user || !profile) {
+  if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-green-50">
         <div className="text-center">
@@ -266,12 +270,14 @@ export default function ProfilePage() {
             </svg>
             Back to Dashboard
           </Link>
-          <button
-            onClick={() => signOut({ callbackUrl: "/signin" })}
-            className="text-red-600 hover:text-red-700 font-medium transition-colors"
-          >
-            Sign Out
-          </button>
+          {isOwnProfile && (
+            <button
+              onClick={() => signOut({ callbackUrl: "/signin" })}
+              className="text-red-600 hover:text-red-700 font-medium transition-colors"
+            >
+              Sign Out
+            </button>
+          )}
         </div>
 
         {/* Message Alert */}
@@ -288,7 +294,7 @@ export default function ProfilePage() {
         )}
 
         {/* Profile Card */}
-        <div className="flex w-full  flex-col bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div className="flex w-full flex-col bg-white rounded-2xl shadow-lg overflow-hidden">
           {/* Profile Header */}
           <div className="flex w-full bg-gradient-to-r from-blue-500 to-green-500 h-32"></div>
 
@@ -307,25 +313,27 @@ export default function ProfilePage() {
                   {getInitials(profile.name)}
                 </div>
               )}
-              <button
-                onClick={() => handleEdit("avatar")}
-                className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                title="Change avatar"
-              >
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {isOwnProfile && (
+                <button
+                  onClick={() => handleEdit("avatar")}
+                  className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                  title="Change avatar"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className="w-5 h-5 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                    />
+                  </svg>
+                </button>
+              )}
             </div>
 
             {/* Name and Type Badge */}
@@ -336,12 +344,12 @@ export default function ProfilePage() {
                 </h1>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    user.type === "user"
+                    profile.type === "user"
                       ? "bg-blue-100 text-blue-700"
                       : "bg-green-100 text-green-700"
                   }`}
                 >
-                  {user.type === "user" ? "Account" : "Guest"}
+                  {profile.type === "user" ? "Account" : "Guest"}
                 </span>
               </div>
               <p className="text-sm text-gray-500">
@@ -357,16 +365,18 @@ export default function ProfilePage() {
                   <label className="text-sm font-medium text-gray-700">
                     Display Name
                   </label>
-                  {editingSection !== "name" && user.type === "user" && (
-                    <button
-                      onClick={() => handleEdit("name")}
-                      className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer"
-                    >
-                      Edit
-                    </button>
-                  )}
+                  {editingSection !== "name" &&
+                    isOwnProfile &&
+                    profile.type === "user" && (
+                      <button
+                        onClick={() => handleEdit("name")}
+                        className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                    )}
                 </div>
-                {editingSection === "name" ? (
+                {editingSection === "name" && isOwnProfile ? (
                   <div className="space-y-3">
                     <input
                       type="text"
@@ -399,13 +409,13 @@ export default function ProfilePage() {
               </div>
 
               {/* Email Section (Users Only) */}
-              {user.type === "user" && (
+              {profile.type === "user" && (
                 <div className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm font-medium text-gray-700">
                       Email Address
                     </label>
-                    {editingSection !== "email" && (
+                    {editingSection !== "email" && isOwnProfile && (
                       <button
                         onClick={() => handleEdit("email")}
                         className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer"
@@ -414,7 +424,7 @@ export default function ProfilePage() {
                       </button>
                     )}
                   </div>
-                  {editingSection === "email" ? (
+                  {editingSection === "email" && isOwnProfile ? (
                     <div className="space-y-3">
                       <input
                         type="email"
@@ -455,7 +465,7 @@ export default function ProfilePage() {
                   <label className="text-sm font-medium text-gray-700">
                     About Me
                   </label>
-                  {editingSection !== "description" && (
+                  {editingSection !== "description" && isOwnProfile && (
                     <button
                       onClick={() => handleEdit("description")}
                       className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer"
@@ -464,7 +474,7 @@ export default function ProfilePage() {
                     </button>
                   )}
                 </div>
-                {editingSection === "description" ? (
+                {editingSection === "description" && isOwnProfile ? (
                   <div className="space-y-3">
                     <textarea
                       value={formData.description}
@@ -502,72 +512,74 @@ export default function ProfilePage() {
               </div>
 
               {/* Avatar URL Section */}
-              <div className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Avatar URL
-                  </label>
-                  {editingSection !== "avatar" && (
-                    <button
-                      onClick={() => handleEdit("avatar")}
-                      className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer"
-                    >
-                      Edit
-                    </button>
+              {isOwnProfile && (
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Avatar URL
+                    </label>
+                    {editingSection !== "avatar" && (
+                      <button
+                        onClick={() => handleEdit("avatar")}
+                        className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </div>
+                  {editingSection === "avatar" ? (
+                    <div className="space-y-3">
+                      <input
+                        type="url"
+                        value={formData.avatar}
+                        onChange={(e) =>
+                          setFormData({ ...formData, avatar: e.target.value })
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="https://example.com/avatar.jpg"
+                      />
+                      {formData.avatar && (
+                        <div className="flex items-center gap-3">
+                          <Image
+                            src={formData.avatar}
+                            alt="Preview"
+                            width={64}
+                            height={64}
+                            className="w-16 h-16 rounded-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src = "";
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                          <span className="text-sm text-gray-500">Preview</span>
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleSave}
+                          disabled={saving}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 transition-colors cursor-pointer"
+                        >
+                          {saving ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          onClick={handleCancel}
+                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-900 break-all">
+                      {profile.avatar || "No avatar URL set"}
+                    </p>
                   )}
                 </div>
-                {editingSection === "avatar" ? (
-                  <div className="space-y-3">
-                    <input
-                      type="url"
-                      value={formData.avatar}
-                      onChange={(e) =>
-                        setFormData({ ...formData, avatar: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                      placeholder="https://example.com/avatar.jpg"
-                    />
-                    {formData.avatar && (
-                      <div className="flex items-center gap-3">
-                        <Image
-                          src={formData.avatar}
-                          alt="Preview"
-                          width={64}
-                          height={64}
-                          className="w-16 h-16 rounded-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = "";
-                            e.currentTarget.style.display = "none";
-                          }}
-                        />
-                        <span className="text-sm text-gray-500">Preview</span>
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 transition-colors cursor-pointer"
-                      >
-                        {saving ? "Saving..." : "Save"}
-                      </button>
-                      <button
-                        onClick={handleCancel}
-                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-gray-900 break-all">
-                    {profile.avatar || "No avatar URL set"}
-                  </p>
-                )}
-              </div>
+              )}
 
-              {/* Password Section (Users Only) */}
-              {user.type === "user" && (
+              {/* Password Section (Users Only, Own Profile Only) */}
+              {profile.type === "user" && isOwnProfile && (
                 <div className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm font-medium text-gray-700">
@@ -652,7 +664,7 @@ export default function ProfilePage() {
                 <div>
                   <p className="text-gray-500">Account Type</p>
                   <p className="font-medium text-gray-900">
-                    {user.type === "user" ? "Registered User" : "Guest User"}
+                    {profile.type === "user" ? "Registered User" : "Guest User"}
                   </p>
                 </div>
                 <div>
