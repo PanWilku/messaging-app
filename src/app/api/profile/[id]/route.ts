@@ -43,6 +43,8 @@ export async function GET(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
+    console.log("Profile found, avatar:", profile.avatar);
+
     return NextResponse.json({ profile });
   } catch (error) {
     console.error("Error fetching profile:", error);

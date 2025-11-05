@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "mini-projects-bucket.s3.ap-southeast-2.amazonaws.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };
